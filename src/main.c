@@ -12,12 +12,14 @@ int generate(Args *args) {
 
     buf = calloc(args->size + 1, sizeof(char));
     if (buf == NULL) {
+        status = 1;
         perror("calloc");
         goto cleanup;
     }
 
     fp = fopen(URANDOM, "r");
     if (fp == NULL) {
+        status = 1;
         perror("fopen");
         goto cleanup;
     }
@@ -46,9 +48,8 @@ cleanup:
     free(buf);
 
     if (fp != NULL && fclose(fp) != 0) {
+        status = 1;
         perror("flose");
-    } else {
-        status = 0;
     }
 
     return status;
