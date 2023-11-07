@@ -4,20 +4,22 @@
 
 #define URANDOM "/dev/urandom"
 
-void generate(Args *args) {
-    int c;
+int generate(Args *args) {
+    int c = 0, status = 0;
     long end = 0;
-    char *buf = calloc(args->size + 1, sizeof(char));
-    FILE *fp = fopen(URANDOM, "r");
+    char *buf = NULL;
+    FILE *fp = NULL;
 
+    buf = calloc(args->size + 1, sizeof(char));
     if (buf == NULL) {
         perror("calloc");
-        exit(1);
+        goto cleanup;
     }
 
+    fp = fopen(URANDOM, "r");
     if (fp == NULL) {
         perror("fopen");
-        exit(1);
+        goto cleanup;
     }
 
     while (end < args->size) {
@@ -39,12 +41,17 @@ void generate(Args *args) {
     // Print the generated string
     puts(buf);
 
+cleanup:
     // Free resources
     free(buf);
 
-    if (fclose(fp) != 0) {
+    if (fp != NULL && fclose(fp) != 0) {
         perror("flose");
+    } else {
+        status = 0;
     }
+
+    return status;
 }
 
 int main(int argc, char *argv[]) {
@@ -60,5 +67,6 @@ int main(int argc, char *argv[]) {
     if (argc < 1) return 1;
 
     Args_parse(&args, argc, argv);
-    generate(&args);
+
+    return generate(&args);
 }
